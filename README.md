@@ -15,6 +15,7 @@ The project is intentionally simple: no database, no account system, no build st
 - Local generation history in "My Images"
 - Generated base64 images saved to `public/generated/`
 - Image preview with zoom, pan, and download
+- Prompt thumbnail images included in `public/source-images/`
 
 ## Quick Start
 
@@ -55,6 +56,7 @@ API keys are entered in the web UI and stored in browser `localStorage`. They ar
 - `public/style.css` - UI theme and responsive styles
 - `public/app.js` - gallery, i18n, generation, preview, and history logic
 - `public/prompts.json` - curated prompt data
+- `public/source-images/` - bundled prompt preview images
 - `public/generated/` - locally generated images, ignored by git
 - `server.js` - static server and image API proxy
 - `scripts/enrich-prompts-i18n.js` - enrich prompt records with i18n metadata
@@ -76,7 +78,7 @@ The validator reports remaining translation and metadata gaps.
 
 Generated images are local artifacts and are ignored by git.
 
-Prompt thumbnail assets are optional. If `public/source-images/` does not contain a referenced image, the server returns a built-in placeholder image so the app still works.
+Prompt thumbnail assets are bundled in `public/source-images/`. If a referenced file is missing, the server still returns a built-in placeholder image so the app does not break.
 
 ## License
 
