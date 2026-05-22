@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Prompt Studio</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <div class="confetti confetti-one"></div>
+    <div class="confetti confetti-two"></div>
+    <div class="confetti confetti-three"></div>
+
+    <header class="topbar">
+      <div class="brand">
+        <p class="eyebrow" data-i18n="brandEyebrow">Local Image Prompt Tool</p>
+        <h1>Image Prompt Studio</h1>
+      </div>
+      <div class="top-actions">
+        <div class="language-toggle" role="group" aria-label="Language">
+          <button class="language-option active" data-ui-lang="zh" type="button">中文</button>
+          <button class="language-option" data-ui-lang="en" type="button">EN</button>
+        </div>
+        <button id="apiKeyButton" class="stat-pill key-pill" type="button">
+          <span id="apiKeyStatus">设置 API Key</span>
+        </button>
+        <button id="myImagesButton" class="stat-pill my-images-pill" type="button">
+          <span data-i18n="myImages">我的图片</span>
+        </button>
+        <span class="stat-pill"><strong id="totalCount">612</strong> prompts</span>
+      </div>
+    </header>
+
+    <main class="shell">
+      <aside class="sidebar panel">
+        <label class="field-label" for="searchInput" data-i18n="searchLabel">搜索提示词</label>
+        <div class="search-box">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m21 21-4.35-4.35m1.35-5.15a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0Z"/></svg>
+          <input id="searchInput" type="search" placeholder="海报、电商、头像、3D..." />
+        </div>
+
+        <div class="filter-block">
+          <div class="block-title" data-i18n="categoryTitle">分类</div>
+          <div id="categoryList" class="chip-list"></div>
+        </div>
+
+        <div class="filter-block">
+          <div class="block-title" data-i18n="tagTitle">快捷标签</div>
+          <div id="tagList" class="chip-list"></div>
+        </div>
+
+        <div class="tip-card">
+          <strong data-i18n="usageTitle">使用方式</strong>
+          <p data-i18n="usageBody">先在顶部设置 API Key，再选择模板修改提示词。上传参考图会自动切到图生图。</p>
+        </div>
+      </aside>
+
+      <section class="gallery-wrap">
+        <div class="toolbar panel">
+          <div>
+            <p class="eyebrow" data-i18n="galleryEyebrow">Prompt Gallery</p>
+            <h2 id="resultTitle">全部模板</h2>
+          </div>
+          <select id="sortSelect" aria-label="排序">
+            <option value="default" data-i18n="sortDefault">默认排序</option>
+            <option value="title" data-i18n="sortTitle">标题 A-Z</option>
+            <option value="category" data-i18n="sortCategory">分类排序</option>
+          </select>
+        </div>
+        <div id="gallery" class="gallery" aria-live="polite"></div>
+      </section>
+
+      <aside class="detail panel" id="detailPanel">
+        <button class="detail-close" id="detailClose" type="button" aria-label="关闭详情">×</button>
+        <div class="empty-state" id="emptyState">
+          <div class="shape-stack">
+            <span></span><span></span><span></span>
+          </div>
+          <h2 data-i18n="emptyTitle">选一个模板开始</h2>
+          <p data-i18n="emptyBody">左侧搜索，中间点卡片，右侧会出现可编辑提示词和生成按钮。</p>
+        </div>
+
+        <div class="detail-content hidden" id="detailContent">
+          <button class="detail-cover" id="previewOpen" type="button" aria-label="点击预览大图">
+            <img id="detailImage" alt="" />
+            <span>点击预览</span>
+          </button>
+
+          <div class="detail-heading">
+            <span id="detailCategory" class="category-badge"></span>
+            <h2 id="detailTitle"></h2>
+            <div id="detailTags" class="tag-row"></div>
+          </div>
+
+          <div class="tabs" role="tablist" aria-label="提示词语言">
+            <button class="tab active" data-lang="cn" type="button">中文</button>
+            <button class="tab" data-lang="en" type="button">English</button>
+          </div>
+
+          <div class="composer-label">
+            <label class="field-label" for="promptEditor">GPT Image-2 Composer</label>
+            <span>gpt-image-2</span>
+          </div>
+
+          <section class="prompt-composer" aria-label="图片生成输入区">
+            <textarea id="promptEditor" spellcheck="false" placeholder="描述你想生成的图片，或从模板里继续修改..."></textarea>
+
+            <div id="imageUploadBox" class="reference-box">
+              <label class="attach-tile">
+                <input id="imageInput" type="file" accept="image/png,image/jpeg,image/webp" multiple />
+                <strong data-i18n="referenceTitle">+ 参考图</strong>
+                <span data-i18n="referenceHint">可选；上传后自动使用图生图</span>
+              </label>
+              <div id="uploadPreview" class="upload-preview"></div>
+            </div>
+
+            <div class="composer-toolbar">
+              <div class="composer-tools">
+                <label class="select-pill">
+                  <span data-i18n="aspectRatio">比例</span>
+                  <select id="aspectRatioSelect">
+                    <option value="1:1">1:1</option>
+                    <option value="9:16">9:16</option>
+                    <option value="16:9">16:9</option>
+                    <option value="3:4">3:4</option>
+                    <option value="4:3">4:3</option>
+                    <option value="2:3">2:3</option>
+                    <option value="3:2">3:2</option>
+                    <option value="21:9">21:9</option>
+                  </select>
+                </label>
+
+                <label class="select-pill">
+                  <span data-i18n="quality">质量</span>
+                  <select id="qualitySelect">
+                    <option value="auto">auto</option>
+                    <option value="low">low</option>
+                    <option value="medium">medium</option>
+                    <option value="high">high</option>
+                  </select>
+                </label>
+              </div>
+
+              <div class="composer-actions">
+                <button id="generateButton" class="button primary" type="button">
+                  <span data-i18n="generate">生成</span>
+                  <b aria-hidden="true">→</b>
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <div id="generateResult" class="result-box hidden"></div>
+        </div>
+      </aside>
+    </main>
+
+    <div class="image-preview hidden" id="imagePreview" role="dialog" aria-modal="true" aria-label="图片预览">
+      <button class="preview-backdrop" id="previewBackdrop" type="button" aria-label="关闭图片预览"></button>
+      <div class="preview-card">
+        <button class="preview-close" id="previewClose" type="button" aria-label="关闭图片预览">×</button>
+        <div class="preview-tools" aria-label="图片预览工具">
+          <button id="previewZoomOut" type="button" aria-label="缩小">−</button>
+          <span id="previewZoomValue">100%</span>
+          <button id="previewZoomIn" type="button" aria-label="放大">+</button>
+          <button id="previewZoomReset" type="button">1:1</button>
+          <a id="previewDownload" class="preview-download hidden" href="#" download>下载</a>
+        </div>
+        <div class="preview-stage">
+          <img id="previewImage" alt="" />
+        </div>
+        <div class="preview-caption" id="previewCaption"></div>
+      </div>
+    </div>
+
+    <div class="my-images-drawer hidden" id="myImagesDrawer" role="dialog" aria-modal="true" aria-labelledby="myImagesTitle">
+      <button class="my-images-backdrop" id="myImagesBackdrop" type="button" aria-label="关闭我的图片"></button>
+      <section class="my-images-panel panel">
+        <div class="my-images-head">
+          <div>
+            <p class="eyebrow" data-i18n="localHistory">本地生成历史</p>
+            <h2 id="myImagesTitle" data-i18n="myImages">我的图片</h2>
+          </div>
+          <button class="detail-close" id="myImagesClose" type="button" aria-label="关闭我的图片">×</button>
+        </div>
+        <div id="myImagesContent" class="my-images-content"></div>
+      </section>
+    </div>
+
+    <div class="api-modal hidden" id="apiModal" role="dialog" aria-modal="true" aria-labelledby="apiModalTitle">
+      <button class="api-modal-backdrop" id="apiModalBackdrop" type="button" aria-label="关闭 API Key 设置"></button>
+      <div class="api-modal-card">
+        <button class="preview-close" id="apiModalClose" type="button" aria-label="关闭 API Key 设置">×</button>
+        <p class="eyebrow" data-i18n="projectSettings">Project Settings</p>
+        <h2 id="apiModalTitle">API Key</h2>
+        <label class="api-field">
+          <span class="field-label">GPT Image-2 API Key</span>
+          <input id="apiKeyInput" type="password" placeholder="输入 API Key，仅保存在本机浏览器" autocomplete="off" />
+        </label>
+        <button id="apiKeySave" class="button primary" type="button">
+          <span data-i18n="save">保存</span>
+          <b aria-hidden="true">→</b>
+        </button>
+      </div>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>

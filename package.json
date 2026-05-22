@@ -1,0 +1,15 @@
+{
+  "name": "image-prompt-studio",
+  "version": "0.1.0",
+  "private": false,
+  "description": "A local-first prompt gallery and GPT Image-2 generation helper for curated image prompts.",
+  "scripts": {
+    "dev": "node server.js",
+    "enrich:i18n": "node scripts/enrich-prompts-i18n.js",
+    "start": "node server.js",
+    "validate:content": "node scripts/validate-content.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
